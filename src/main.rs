@@ -1,46 +1,55 @@
 //use std::any::{Any, TypeId};
-use std::any::{Any};
+use std::any::{dyn Any};
 use std::thread;
+use std::ptr::null;
 
 fn main() {
-    struct IP <'a>{
-        data: &'a dyn Any,
-        owner: &'a FBPComponent
+	
+	struct FBPComponent{
+        closed: bool
     }
 
-	impl IP {
+	
+    struct IP <'a>{
+          owner: &'a FBPComponent,
+		  data: &'a dyn Any 
+    }
+
+	impl IP <'_> {
         pub fn new(data : dyn Any) -> Self {
             let x: IP;
-            let x.data = data : dyn Any;           
-            let.x.owner = {unknown};
+            x.data = data;           
+            x.owner = null;
             x
         }
        
     }
    
     struct Conn <'a> {
-        conn: [&'a IP<'a>],
-        nextGet: u32,
-        nextPut: u32,
-        cap: u32
+      
+        nextGet: usize,
+        nextPut: usize,
+        cap: u32,
+ 		//conn: [&'a IP<'a>] 
+	    conn: Box<[&'a IP<'a>]> 
     }
 
     impl Conn <'_> {
         pub fn new(cap: u32) -> Self {
             let x: Conn;
-            let x: [&IP; cap] = Default::default();            
+            x.conn: [&IP; cap] = Default::default();            
             x.nextGet = 0;
             x.nextPut = 0;
             x.cap = cap;
             x
         }
-        pub fn send(val : IP) -> bool {
-           conn[nextPut] = val; 
-           nextPut = nextPut + 1;
-           if nextPut >= conn.len() {
-              nextPut = 0;
+    pub fn send(self: &Self, val : IP) -> bool {
+           self.conn[self.nextPut] = val; 
+           self.nextPut = self.nextPut + 1;
+           if self.nextPut >= self.conn.len() {
+              self.nextPut = 0;
 			}
- 	       true; 
+ 	       return true; 
         }
     }
 
