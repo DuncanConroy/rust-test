@@ -6,13 +6,13 @@ use std::collections::VecDeque;
 
 fn main() {
 	
-	struct FBPComponent{
+	struct FBPProcess{
         closed: bool
     }
 
 	
     struct IP <'a>{
-          owner: &'a FBPComponent,
+          owner: &'a FBPProcess,
 		  data: &'a dyn Any
     }
 
@@ -20,7 +20,7 @@ fn main() {
         pub fn new(data : &dyn Any) -> Self {
             let x: IP;
             x.data = data;           
-            x.owner = null;
+            //x.owner = null;
             x
         }
        
@@ -35,7 +35,7 @@ fn main() {
     impl Conn <'_> {
        pub fn new(cap: u32) -> Self {
             let x: Conn;
-            x.conn: VecDeque<IP> = VecDeque::<IP>::new();       
+            x.conn = VecDeque::new();       
             x.cap = cap;
             x
         }
