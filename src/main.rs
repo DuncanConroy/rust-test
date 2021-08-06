@@ -1,57 +1,68 @@
 //use std::fmt::Debug;
 use std::any::Any;
-use std::thread;
-use std::ptr::null;
 use std::collections::VecDeque;
+use std::ptr::null;
+use std::thread;
+
 
 fn main() {
-	
-	struct FBPProcess{
-        closed: bool
+
+    #[derive(Debug)]
+    struct FBPProcess {
+        closed: bool,
     }
 
-	
-    struct IP <'a>{
-          owner: &'a FBPProcess,
-		  data: &'a dyn Any
+    #[derive(Debug)]
+    struct IP {
+        owner: Option<FBPProcess>,
+        data: Box<dyn Any>,
     }
 
-	impl IP <'a> {
-        pub fn new <'a> (data : &'a dyn Any) -> Self {
-            let x: IP;
-            x.data = data;           
-            //x.owner = null;
-            x
+
+    impl IP {
+        pub fn new(data: Box<dyn Any>) -> Self {
+            IP {
+                data,
+                owner: None,
+            }
+
         }
-       
     }
-   
-    struct Conn <'a>{
-      
+
+    unsafe impl Send for IP {}
+
+    struct Conn {
         cap: u32,
-	   conn: VecDeque<IP<'a>>
+        conn: VecDeque<IP>,
     }
 
-    impl Conn <'_> {
-       pub fn new(cap: u32) -> Self {
-            let x: Conn;
-            x.conn = VecDeque::new();       
-            x.cap = cap;
-            x
+    impl Conn {
+        pub fn new(cap: u32) -> Self {
+            Conn {
+                conn: VecDeque::new(),
+                cap,
+            }
         }
-    pub fn send(&mut self, val : IP) -> bool {
-           self.conn.push_back(val);
- 	       return true; 
+
+
+        pub fn send(self: &mut Self, val: IP) -> bool {
+            println!("Received: {:#?}", &val);
+            self.conn.push_back(val);
+            return true;
+
         }
     }
 
-    
+    unsafe impl Send for Conn {}
+
     let mut conn = Conn::new(5);
 
-    //thread::spawn(move || {
-        let mut val = IP::new(&String::from("hello"));       
+
+    thread::spawn(move || {
+        let val = IP::new(Box::new(String::from("hello")));
         conn.send(val);
-   // });
+    }).join();
+
 
     
 }
