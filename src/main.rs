@@ -16,8 +16,8 @@ fn main() {
 		  data: &'a dyn Any
     }
 
-	impl IP <'_> {
-        pub fn new(data : &dyn Any) -> Self {
+	impl IP <'a> {
+        pub fn new <'a> (data : &'a dyn Any) -> Self {
             let x: IP;
             x.data = data;           
             //x.owner = null;
@@ -39,7 +39,7 @@ fn main() {
             x.cap = cap;
             x
         }
-    pub fn send(self: &Self, val : IP) -> bool {
+    pub fn send(&mut self, val : IP) -> bool {
            self.conn.push_back(val);
  	       return true; 
         }
@@ -48,11 +48,10 @@ fn main() {
     
     let mut conn = Conn::new(5);
 
-    thread::spawn(move || {
+    //thread::spawn(move || {
         let mut val = IP::new(&String::from("hello"));       
         conn.send(val);
-    });
+   // });
 
-    //let received = rx.recv().unwrap();
-    //println!("Got: {}", received);
+    
 }
