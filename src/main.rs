@@ -18,12 +18,14 @@ fn main() {
         data: Box<dyn Any>,
     }
 
+
     impl IP {
         pub fn new(data: Box<dyn Any>) -> Self {
             IP {
                 data,
                 owner: None,
             }
+
         }
     }
 
@@ -42,10 +44,12 @@ fn main() {
             }
         }
 
+
         pub fn send(self: &mut Self, val: IP) -> bool {
             println!("Received: {:#?}", &val);
             self.conn.push_back(val);
             return true;
+
         }
     }
 
@@ -53,11 +57,12 @@ fn main() {
 
     let mut conn = Conn::new(5);
 
+
     thread::spawn(move || {
         let val = IP::new(Box::new(String::from("hello")));
         conn.send(val);
     }).join();
 
-    //let received = rx.recv().unwrap();
-    //println!("Got: {}", received);
+
+    
 }
