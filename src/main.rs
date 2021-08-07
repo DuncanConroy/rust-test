@@ -1,20 +1,47 @@
 //use std::fmt::Debug;
 use std::any::Any;
 use std::collections::VecDeque;
-use std::ptr::null;
 use std::thread;
 
 
 fn main() {
 
+	struct Foo<F>
+	where
+  	  F: Fn() -> bool,
+	{
+    	pub foo: F,
+	}
+
+	impl<F> Foo<F>
+	where
+ 	   F: Fn() -> bool,
+	{
+   	 fn new(foo: F) -> Self {
+       	 Self { foo }
+    	}
+	}
+
+
     #[derive(Debug)]
-    struct FBPProcess {
+    struct Process {
+	    exec: Foo<F>,
         closed: bool,
+    }
+
+	impl Process {
+        pub fn new(exec: Foo<F>) -> Self {
+            Process {
+                exec,
+                closed: false
+            }
+
+        }
     }
 
     #[derive(Debug)]
     struct IP {
-        owner: Option<FBPProcess>,
+        owner: Option<Process>,
         data: Box<dyn Any>,
     }
 
@@ -55,13 +82,21 @@ fn main() {
 
     unsafe impl Send for Conn {}
 
+	
+    let foo = Foo { foo: {
+	    let val = IP::new(Box::new(String::from("hello")));
+        conn.send(val);
+        //return true; 
+	} };
+	
+    
+
     let mut conn = Conn::new(5);
 
+	let mut proc1 = Process::new(foo(&conn));
 
-    thread::spawn(move || {
-        let val = IP::new(Box::new(String::from("hello")));
-        conn.send(val);
-    }).join();
+
+    thread::spawn(move || {proc1.exec}).join();
 
 
     
