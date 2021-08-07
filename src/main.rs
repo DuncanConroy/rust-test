@@ -6,19 +6,17 @@ use std::thread;
 
 fn main() {
 
-	struct Foo<F>   // assume Foo is the name of a closure - it will hold processing for a Process (?)
-    // what is <F> for ?
-    // how does closure access the Process it's "in"?
+	struct ProcA<F>  
 	where
-  	  F: Fn() -> bool,
+  	  F: FnMut() -> bool,
 	{
     	pub foo: F,
 	}
 
-    // when does closure's function execute?
-	impl<F> Foo<F>
+    
+	impl<F> ProcA<F>
 	where
- 	   F: Fn() -> bool,
+ 	   F: FnMut() -> bool,
 	{
    	 fn new(foo: F) -> Self {
        	 Self { foo }
@@ -28,13 +26,13 @@ fn main() {
 
     #[derive(Debug)]
     struct Process {
-	    exec: Foo<F>,
+	    exec: ProcA<F>,
         closed: bool,
 		cnxt: Option<Conn> 
     }
 
 	impl Process {
-        pub fn new(exec: Foo<F>) -> Self {
+        pub fn  new(exec: new (foo< F>)) -> Self {
             Process {
                 exec,
                 closed: false,
@@ -89,11 +87,11 @@ fn main() {
     unsafe impl Send for Conn {}
 
 	
-    let foo = Foo<()> { foo: {
+    let foo = ProcA::<()> { foo: {
 	    let val = IP::new(Box::new(String::from("hello")));
 		let conn = self.cnxt;
         conn.send(val);
-        //return true; 
+        return true; 
 	} };
 	
     
