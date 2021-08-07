@@ -1,13 +1,7 @@
 [package]
 name = "rust-test"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["J. Paul Morrison<jpaulmorr@gmail.com>"]
 license = "Artistic License 2"
 homepage = "https://jpaulm.github.io"
 description = "Test bed for Rust testing"
-
-[dependencies]
-libloading = "0.5"
-threadpool = "*"
-env_logger = "*"
-
