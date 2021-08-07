@@ -6,33 +6,17 @@ use std::thread;
 
 fn main() {
 
-	struct ProcA<F>  
-	where
-  	  F: FnMut() -> bool,
-	{
-    	pub foo: F,
-	}
-
-    
-	impl<F> ProcA<F>
-	where
- 	   F: FnMut() -> bool,
-	{
-   	 fn new(foo: F) -> Self {
-       	 Self { foo }
-    	}
-	}
-
+	
 
     #[derive(Debug)]
-    struct Process {
-	    exec: ProcA<F>,
+    struct Process<T> {
+	    exec,
         closed: bool,
 		cnxt: Option<Conn> 
     }
 
-	impl Process {
-        pub fn  new(exec: new (foo< F>)) -> Self {
+	impl Process<T> {
+        pub fn  new() -> Self {
             Process {
                 exec,
                 closed: false,
@@ -87,7 +71,7 @@ fn main() {
     unsafe impl Send for Conn {}
 
 	
-    let foo = ProcA::<()> { foo: {
+    let procA = || {
 	    let val = IP::new(Box::new(String::from("hello")));
 		let conn = self.cnxt;
         conn.send(val);
@@ -98,7 +82,7 @@ fn main() {
 
     let mut conn = Conn::new(5);
 
-	let mut proc1 = Process::new(foo);
+	let mut proc1 = Process::new(ProcA);
 	proc1.cnxt = conn;
 
 
