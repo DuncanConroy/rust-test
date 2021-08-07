@@ -28,6 +28,7 @@ fn main() {
     struct Process {
 	    exec: Foo<F>,
         closed: bool,
+		conn: Connection 
     }
 
 	impl Process {
@@ -86,6 +87,7 @@ fn main() {
 	
     let foo = Foo { foo: {
 	    let val = IP::new(Box::new(String::from("hello")));
+		let conn = self.conn;
         conn.send(val);
         //return true; 
 	} };
@@ -94,7 +96,8 @@ fn main() {
 
     let mut conn = Conn::new(5);
 
-	let mut proc1 = Process::new(foo(&conn));
+	let mut proc1 = Process::new(foo);
+	proc1.cnxt = conn;
 
 
     thread::spawn(move || {proc1.exec}).join();
