@@ -5,7 +5,7 @@ use std::thread;
 
 
 fn main() {
-
+/*
 	struct ProcA<F>  
 	where
   	  F: FnMut() -> bool,
@@ -22,19 +22,19 @@ fn main() {
        	 Self { foo }
     	}
 	}
-
+*/
 
     #[derive(Debug)]
     struct Process {
-	    exec: ProcA<F>,
+	executable: ProcA<F>,
         closed: bool,
-		cnxt: Option<Conn> 
+	cnxt: Option<Conn> 
     }
 
 	impl Process {
         pub fn  new(exec: new (foo< F>)) -> Self {
             Process {
-                exec,
+                executable,
                 closed: false,
                 cnxt: None
             }
