@@ -6,17 +6,33 @@ use std::thread;
 
 fn main() {
 
-	
+	struct ProcA<F>  
+	where
+  	  F: FnMut() -> bool,
+	{
+    	pub foo: F,
+	}
+
+    
+	impl<F> ProcA<F>
+	where
+ 	   F: FnMut() -> bool,
+	{
+   	 fn new(foo: F) -> Self {
+       	 Self { foo }
+    	}
+	}
+
 
     #[derive(Debug)]
-    struct Process<T> {
-	    exec,
+    struct Process {
+	    exec: ProcA<F>,
         closed: bool,
 		cnxt: Option<Conn> 
     }
 
-	impl Process<T> {
-        pub fn  new() -> Self {
+	impl Process {
+        pub fn  new(exec: new (foo< F>)) -> Self {
             Process {
                 exec,
                 closed: false,
@@ -71,7 +87,7 @@ fn main() {
     unsafe impl Send for Conn {}
 
 	
-    let procA = || {
+    let foo = ProcA::<()> { foo: {
 	    let val = IP::new(Box::new(String::from("hello")));
 		let conn = self.cnxt;
         conn.send(val);
@@ -82,9 +98,42 @@ fn main() {
 
     let mut conn = Conn::new(5);
 
-	let mut proc1 = Process::new(ProcA);
-	proc1.cnxt = conn;
+    let mut proc1 = Process::new(foo);
+    proc1.cnxt = conn;
 
+  // use Cacher as template for what I want to do!
+    // https://doc.rust-lang.org/book/ch13-01-closures.html
+    
+struct Cacher<T>
+where
+    T: Fn(u32) -> u32,
+{
+    calculation: T,
+    value: Option<u32>,
+}
+    
+impl<T> Cacher<T>
+where
+    T: Fn(u32) -> u32,
+{
+    fn new(calculation: T) -> Cacher<T> {
+        Cacher {
+            calculation,
+            value: None,
+        }
+    }
+
+    fn value(&mut self, arg: u32) -> u32 {
+        match self.value {
+            Some(v) => v,
+            None => {
+                let v = (self.calculation)(arg);
+                self.value = Some(v);
+                v
+            }
+        }
+    }
+}
 
     thread::spawn(move || {proc1.exec}).join();
 
