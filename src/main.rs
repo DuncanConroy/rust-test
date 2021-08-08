@@ -1,7 +1,7 @@
 //use std::fmt::Debug;
 use std::any::Any;
 use std::collections::VecDeque;
-use std::ptr::null;
+//use std::ptr::null;
 use std::thread;
 
 
@@ -9,7 +9,18 @@ fn main() {
 
     #[derive(Debug)]
     struct Process {
+        exec: dyn Fn() -> (),
         closed: bool,
+    }
+
+    impl Process {
+        pub fn new() -> Self {
+            Process {
+                exec,
+                closed,
+            }
+
+        }
     }
 
     #[derive(Debug)]
@@ -57,10 +68,18 @@ fn main() {
 
     let mut conn = Conn::new(5);
 
-
-    thread::spawn(move || {
+    
+    pub fn mySender () {
         let val = IP::new(Box::new(String::from("hello")));
         conn.send(val);
+    }
+
+    let proc_a: Process = Process::new(mySender);
+
+    thread::spawn(move || {
+        for n in 1..=10 {
+            proc_a.exec();
+        }
     }).join();
 
 
