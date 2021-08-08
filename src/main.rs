@@ -100,7 +100,7 @@ fn main() {
 
     let mut proc1 = Process::new(foo);
     proc1.cnxt = conn;
-
+/*
   // use Cacher as template for what I want to do!
     // https://doc.rust-lang.org/book/ch13-01-closures.html
     
@@ -134,7 +134,7 @@ where
         }
     }
 }
-
+*/
     thread::spawn(move || {proc1.exec}).join();
 
 
