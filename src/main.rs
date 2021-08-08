@@ -9,17 +9,25 @@ fn main() {
 
     #[derive(Debug)]
     struct Process {
-        exec: dyn Fn() -> (),
+        exec: Fn() -> (),
         closed: bool,
     }
 
     impl Process {
         pub fn new() -> Self {
             Process {
-                exec,
-                closed,
+                exec: None,
+                closed:false,
             }
 
+        }
+
+        pub fn execute(self: &mut Self) -> JoinHandle {
+            thread::spawn(move || {
+                for n in 1..=10 {
+                    self.exec();
+                }
+            });
         }
     }
 
@@ -69,18 +77,15 @@ fn main() {
     let mut conn = Conn::new(5);
 
     
-    pub fn mySender () {
+    pub  fn mySender() {
         let val = IP::new(Box::new(String::from("hello")));
         conn.send(val);
     }
 
     let proc_a: Process = Process::new(mySender);
 
-    thread::spawn(move || {
-        for n in 1..=10 {
-            proc_a.exec();
-        }
-    }).join();
+    
+    proc_a.execute().join();
 
 
     
