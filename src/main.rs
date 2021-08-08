@@ -1,3 +1,4 @@
+//use std::fmt::Debug;
 use std::any::Any;
 use std::collections::VecDeque;
 
@@ -5,38 +6,35 @@ use std::thread;
 
 
 fn main() {
-/*
-	struct ProcA<F>  
+
+	struct Foo<F>
 	where
-  	  F: FnMut() -> bool,
+  	  F: Fn() -> bool,
 	{
     	pub foo: F,
 	}
 
-    
-	impl<F> ProcA<F>
+	impl<F> Foo<F>
 	where
- 	   F: FnMut() -> bool,
+ 	   F: Fn() -> bool,
 	{
    	 fn new(foo: F) -> Self {
        	 Self { foo }
     	}
 	}
-*/
+
 
     #[derive(Debug)]
     struct Process {
-	executable: ProcA<F>,
+	    exec: Foo<F>,
         closed: bool,
-	cnxt: Option<Conn> 
     }
 
 	impl Process {
-        pub fn  new(exec: new (foo< F>)) -> Self {
+        pub fn new(exec: Foo<F>) -> Self {
             Process {
-                executable,
-                closed: false,
-                cnxt: None
+                exec,
+                closed: false
             }
 
         }
@@ -61,7 +59,6 @@ fn main() {
 
     unsafe impl Send for IP {}
 
-    #[derive(Debug)]
     struct Conn {
         cap: u32,
         conn: VecDeque<IP>,
@@ -87,54 +84,19 @@ fn main() {
     unsafe impl Send for Conn {}
 
 	
-    let foo = ProcA::<()> { foo: {
+    let foo = Foo { foo: {
 	    let val = IP::new(Box::new(String::from("hello")));
-		let conn = self.cnxt;
         conn.send(val);
-        return true; 
+        //return true; 
 	} };
 	
     
 
     let mut conn = Conn::new(5);
 
-    let mut proc1 = Process::new(foo);
-    proc1.cnxt = conn;
-/*
-  // use Cacher as template for what I want to do!
-    // https://doc.rust-lang.org/book/ch13-01-closures.html
-    
-struct Cacher<T>
-where
-    T: Fn(u32) -> u32,
-{
-    calculation: T,
-    value: Option<u32>,
-}
-    
-impl<T> Cacher<T>
-where
-    T: Fn(u32) -> u32,
-{
-    fn new(calculation: T) -> Cacher<T> {
-        Cacher {
-            calculation,
-            value: None,
-        }
-    }
+	let mut proc1 = Process::new(foo(&conn));
 
-    fn value(&mut self, arg: u32) -> u32 {
-        match self.value {
-            Some(v) => v,
-            None => {
-                let v = (self.calculation)(arg);
-                self.value = Some(v);
-                v
-            }
-        }
-    }
-}
-*/
+
     thread::spawn(move || {proc1.exec}).join();
 
 
