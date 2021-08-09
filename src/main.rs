@@ -3,33 +3,40 @@ use std::any::Any;
 use std::collections::VecDeque;
 //use std::ptr::null;
 use std::thread;
+use thread::JoinHandle;
 
 
 fn main() {
 
-    #[derive(Debug)]
+    #[derive(Debug)]    
     struct Process {
-        exec: Fn() -> (),
+        exec: Box<dyn FnMut() -> bool>,
         closed: bool,
     }
 
     impl Process {
         pub fn new() -> Self {
             Process {
-                exec: {Fn() -> ()},  // probably wrong!
+                exec: Box :: <dyn FnMut()> ,
                 closed:false,
             }
 
         }
 
-        pub fn execute(self: &mut Self) -> JoinHandle {
+        pub fn execute(self: &mut Self) -> JoinHandle<T> {
             thread::spawn(move || {
-                for n in 1..=10 {
-                    self.exec();
+                for n in 1..=10 {      // not real - I just want to show the exec being invoked more than once!
+                    (self.exec)();
                 }
             });
         }
     }
+
+impl Default for Process {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
     #[derive(Debug)]
     struct IP {
@@ -77,14 +84,18 @@ fn main() {
     let mut conn = Conn::new(5);
 
     
-    pub  fn mySender() {
-        let val = IP::new(Box::new(String::from("hello")));
+   // pub  fn mySender() {
+   //     let val = IP::new(Box::new(String::from("hello")));  
+   //     conn.send(val);
+  //  }
+
+    let proc_a: Process = Process::new();
+
+    proc_a.exec = {
+        let val = IP::new(Box::new(String::from("hello")));  
         conn.send(val);
-    }
-
-    let proc_a: Process = Process::new(mySender);
-
-    
+        true
+    };
     proc_a.execute().join();
 
 
