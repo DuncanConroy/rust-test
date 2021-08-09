@@ -16,7 +16,7 @@ fn main() {
     impl Process {
         pub fn new() -> Self {
             Process {
-                exec: None,
+                exec: {Fn() -> ()},  // probably wrong!
                 closed:false,
             }
 
