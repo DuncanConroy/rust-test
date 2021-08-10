@@ -1,8 +1,10 @@
-//use std::fmt::Debug;
+use std::fmt::Debug;
 use std::any::Any;
 use std::collections::VecDeque;
+
 use std::sync::{Arc, Mutex};
 //use std::ptr::null;
+
 use std::thread;
 use thread::JoinHandle;
 
@@ -13,6 +15,7 @@ struct Process {
     pub connection: Arc<Mutex<Conn>>,
     pub closed: bool,
 }
+
 
 impl Process {
     pub fn new(connection: Arc<Mutex<Conn>>, exec: ThreadFn) -> Self {
@@ -29,6 +32,7 @@ impl Process {
         thread::spawn(move || {
             for _ in 1..=10 {      // not real - I just want to show the exec being invoked more than once!
                 (exec_cloned.lock().unwrap())(connection_cloned.clone());
+
             }
         })
     }
@@ -38,6 +42,7 @@ struct IP {
     owner: Option<Process>,
     data: Box<dyn Any>,
 }
+
 
 impl IP {
     pub fn new(data: Box<dyn Any>) -> Self {
@@ -49,6 +54,7 @@ impl IP {
 }
 
 unsafe impl Send for IP {}
+
 
 unsafe impl Sync for IP {}
 
@@ -66,10 +72,12 @@ impl Conn {
     }
 
 
+
     pub fn send(self: &mut Self, val: IP) -> bool {
         println!("Received: {:#?}", &val.data);
         self.conn.push_back(val);
         return true;
+
     }
 }
 
@@ -77,13 +85,16 @@ unsafe impl Send for Conn {}
 
 unsafe impl Sync for Conn {}
 
+
 fn main() {
     let conn = Arc::new(Mutex::new(Conn::new(5)));
+
 
     // pub  fn mySender() {
     //     let val = IP::new(Box::new(String::from("hello")));
     //     conn.send(val);
     //  }
+
 
     let closure = |conn: Arc<Mutex<Conn>>| -> bool {
         let val = IP::new(Box::new(String::from("hello")));
@@ -96,4 +107,5 @@ fn main() {
 
     let process_handle = proc_a.execute();
     process_handle.join();
+
 }
