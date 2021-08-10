@@ -1,44 +1,43 @@
-//use std::fmt::Debug;
+use std::fmt::Debug;
 use std::any::Any;
 use std::collections::VecDeque;
-//use std::ptr::null;
 use std::thread;
 use thread::JoinHandle;
 
 
 fn main() {
 
-    #[derive(Debug)]    
+    //#[derive(Debug)]    
     struct Process {
-        exec: Box<dyn FnMut() -> bool>,
-        closed: bool,
+        exec: Box<dyn FnMut()>,                             
+        closed: bool 
     }
 
     impl Process {
         pub fn new() -> Self {
             Process {
-                exec: Box :: <dyn FnMut()> ,
                 closed:false,
+                exec:  Box<dyn FnMut()>,
             }
 
         }
 
         pub fn execute(self: &mut Self) -> JoinHandle<T> {
             thread::spawn(move || {
-                for n in 1..=10 {      // not real - I just want to show the exec being invoked more than once!
+                for n in 1..=10 {      // not realistic - I just want to show the exec being invoked more than once!
                     (self.exec)();
                 }
             });
         }
     }
 
-impl Default for Process {
-    fn default() -> Self {
-        Self::new()
+    impl Default for Process {
+      fn default() -> Self {
+           Self::new()
+      }
     }
-}
 
-    #[derive(Debug)]
+    //#[derive(Debug)]
     struct IP {
         owner: Option<Process>,
         data: Box<dyn Any>,
@@ -72,7 +71,7 @@ impl Default for Process {
 
 
         pub fn send(self: &mut Self, val: IP) -> bool {
-            println!("Received: {:#?}", &val);
+           // println!("Received: {:#?}", &val);
             self.conn.push_back(val);
             return true;
 
@@ -84,20 +83,18 @@ impl Default for Process {
     let mut conn = Conn::new(5);
 
     
-   // pub  fn mySender() {
-   //     let val = IP::new(Box::new(String::from("hello")));  
-   //     conn.send(val);
-  //  }
+    //pub  fn mySender() {
+    //    let val = IP::new(Box::new(String::from("hello")));  
+    //    conn.send(val);
+    // }
 
     let proc_a: Process = Process::new();
 
-    proc_a.exec = {
-        let val = IP::new(Box::new(String::from("hello")));  
-        conn.send(val);
-        true
-    };
+    proc_a.exec = Box<new|| -> bool {
+        let val = IP::new(Box::new(String::from("hello")));       
+        conn.send(val);    
+    }>;
+
     proc_a.execute().join();
-
-
     
 }
