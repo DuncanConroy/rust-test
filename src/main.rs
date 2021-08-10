@@ -1,103 +1,99 @@
 //use std::fmt::Debug;
 use std::any::Any;
 use std::collections::VecDeque;
+use std::sync::{Arc, Mutex};
 //use std::ptr::null;
 use std::thread;
 use thread::JoinHandle;
 
+type ThreadFn = Arc<Mutex<FnMut(Arc<Mutex<Conn>>) -> bool + Sync + Send>>;
 
-fn main() {
+struct Process {
+    pub exec: ThreadFn,
+    pub connection: Arc<Mutex<Conn>>,
+    pub closed: bool,
+}
 
-    #[derive(Debug)]    
-    struct Process {
-        exec: Box<dyn FnMut() -> bool>,
-        closed: bool,
+impl Process {
+    pub fn new(connection: Arc<Mutex<Conn>>, exec: ThreadFn) -> Self {
+        Process {
+            exec,
+            connection,
+            closed: false,
+        }
     }
 
-    impl Process {
-        pub fn new() -> Self {
-            Process {
-                exec: Box :: <dyn FnMut()> ,
-                closed:false,
+    pub fn execute(self: &Self) -> JoinHandle<()> {
+        let exec_cloned = self.exec.clone();
+        let connection_cloned = self.connection.clone();
+        thread::spawn(move || {
+            for _ in 1..=10 {      // not real - I just want to show the exec being invoked more than once!
+                (exec_cloned.lock().unwrap())(connection_cloned.clone());
             }
-
-        }
-
-        pub fn execute(self: &mut Self) -> JoinHandle<T> {
-            thread::spawn(move || {
-                for n in 1..=10 {      // not real - I just want to show the exec being invoked more than once!
-                    (self.exec)();
-                }
-            });
-        }
-    }
-
-impl Default for Process {
-    fn default() -> Self {
-        Self::new()
+        })
     }
 }
 
-    #[derive(Debug)]
-    struct IP {
-        owner: Option<Process>,
-        data: Box<dyn Any>,
+struct IP {
+    owner: Option<Process>,
+    data: Box<dyn Any>,
+}
+
+impl IP {
+    pub fn new(data: Box<dyn Any>) -> Self {
+        IP {
+            data,
+            owner: None,
+        }
     }
+}
 
+unsafe impl Send for IP {}
 
-    impl IP {
-        pub fn new(data: Box<dyn Any>) -> Self {
-            IP {
-                data,
-                owner: None,
-            }
+unsafe impl Sync for IP {}
 
+struct Conn {
+    cap: u32,
+    conn: VecDeque<IP>,
+}
+
+impl Conn {
+    pub fn new(cap: u32) -> Self {
+        Conn {
+            conn: VecDeque::new(),
+            cap,
         }
     }
 
-    unsafe impl Send for IP {}
 
-    struct Conn {
-        cap: u32,
-        conn: VecDeque<IP>,
+    pub fn send(self: &mut Self, val: IP) -> bool {
+        println!("Received: {:#?}", &val.data);
+        self.conn.push_back(val);
+        return true;
     }
+}
 
-    impl Conn {
-        pub fn new(cap: u32) -> Self {
-            Conn {
-                conn: VecDeque::new(),
-                cap,
-            }
-        }
+unsafe impl Send for Conn {}
 
+unsafe impl Sync for Conn {}
 
-        pub fn send(self: &mut Self, val: IP) -> bool {
-            println!("Received: {:#?}", &val);
-            self.conn.push_back(val);
-            return true;
+fn main() {
+    let conn = Arc::new(Mutex::new(Conn::new(5)));
 
-        }
-    }
+    // pub  fn mySender() {
+    //     let val = IP::new(Box::new(String::from("hello")));
+    //     conn.send(val);
+    //  }
 
-    unsafe impl Send for Conn {}
-
-    let mut conn = Conn::new(5);
-
-    
-   // pub  fn mySender() {
-   //     let val = IP::new(Box::new(String::from("hello")));  
-   //     conn.send(val);
-  //  }
-
-    let proc_a: Process = Process::new();
-
-    proc_a.exec = {
-        let val = IP::new(Box::new(String::from("hello")));  
-        conn.send(val);
+    let closure = |conn: Arc<Mutex<Conn>>| -> bool {
+        let val = IP::new(Box::new(String::from("hello")));
+        conn.lock().unwrap().send(val);
         true
     };
-    proc_a.execute().join();
 
+    let mut proc_a: Process = Process::new(conn.clone(),
+                                           Arc::new(Mutex::new(closure)));
 
-    
+    let process_handle = proc_a.execute();
+    process_handle.join();
 }
